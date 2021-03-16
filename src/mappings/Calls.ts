@@ -2,7 +2,6 @@ import {SubstrateExtrinsic} from "@subql/types";
 import {Call} from "../types/models/Call";
 import {Vec} from "@polkadot/types"
 import {AnyTuple, CallBase} from "@polkadot/types/types"
-import {flatten} from "lodash";
 
 function extractCalls(call: CallBase<AnyTuple>, id: number, parentCallId:string): Call[]{
     const callId = `${parentCallId}-${id}`
@@ -12,9 +11,9 @@ function extractCalls(call: CallBase<AnyTuple>, id: number, parentCallId:string)
     entity.parentCallId = parentCallId;
     if (call.method == 'batchAll' && call.section == 'utility'){
         const calls = call.args[0] as Vec<CallBase<AnyTuple>>
-        return flatten(calls.map(async (call,idx) =>
+        return [].concat.apply([],(calls.map((call,idx) =>
             extractCalls(call,idx,callId)
-        ))
+        )))
     }else{
         return [];
     }
